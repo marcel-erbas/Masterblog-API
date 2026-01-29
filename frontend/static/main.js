@@ -1,21 +1,15 @@
-// Function that runs once the window is fully loaded
 window.onload = function() {
-    // Attempt to retrieve the API base URL from the local storage
     var savedBaseUrl = localStorage.getItem('apiBaseUrl');
-    // If a base URL is found in local storage, load the posts
     if (savedBaseUrl) {
         document.getElementById('api-base-url').value = savedBaseUrl;
         loadPosts();
     }
 }
 
-// Function to fetch all the posts from the API and display them on the page
 function loadPosts() {
-    // Retrieve the base URL from the input field and save it to local storage
     var baseUrl = document.getElementById('api-base-url').value;
     localStorage.setItem('apiBaseUrl', baseUrl);
 
-    // Use the Fetch API to send a GET request to the /posts endpoint
     fetch(baseUrl + '/posts')
         .then(response => {
             if (!response.ok) {
@@ -23,12 +17,10 @@ function loadPosts() {
             }
             return response.json();
         })
-        .then(data => {  // Once the data is ready, we can use it
-            // Clear out the post container first
+        .then(data => {
             const postContainer = document.getElementById('post-container');
             postContainer.innerHTML = '';
 
-            // For each post in the response, create a new post element and add it to the page
             data.forEach(post => {
                 const postDiv = document.createElement('div');
                 postDiv.className = 'post';
@@ -43,14 +35,16 @@ function loadPosts() {
         });
 }
 
-// Function to send a POST request to the API to add a new post
 function addPost() {
-    // Retrieve the values from the input fields
     var baseUrl = document.getElementById('api-base-url').value;
     var postTitle = document.getElementById('post-title').value;
     var postContent = document.getElementById('post-content').value;
 
-    // Use the Fetch API to send a POST request to the /posts endpoint
+    if (!postTitle || !postContent) {
+        alert("Missing title or content");
+        return;
+    }
+
     fetch(baseUrl + '/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,7 +52,7 @@ function addPost() {
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.message); });
+            return response.json().then(err => { throw new Error(err.message || 'Failed to add post'); });
         }
         return response.json();
     })
@@ -66,7 +60,7 @@ function addPost() {
         console.log('Post added:', post);
         document.getElementById('post-title').value = '';
         document.getElementById('post-content').value = '';
-        loadPosts(); // Reload the posts after adding a new one
+        loadPosts();
     })
     .catch(error => {
         console.error('Error:', error);
@@ -74,20 +68,18 @@ function addPost() {
     });
 }
 
-// Function to send a DELETE request to the API to delete a post
 function deletePost(postId) {
     var baseUrl = document.getElementById('api-base-url').value;
 
-    // Use the Fetch API to send a DELETE request to the specific post's endpoint
     fetch(baseUrl + '/posts/' + postId, {
         method: 'DELETE'
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.message); });
+            return response.json().then(err => { throw new Error(err.message || 'Delete failed'); });
         }
         console.log('Post deleted:', postId);
-        loadPosts(); // Reload the posts after deleting one
+        loadPosts();
     })
     .catch(error => {
         console.error('Error:', error);
