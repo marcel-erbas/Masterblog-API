@@ -26,7 +26,6 @@ def validate_post_data(data):
     return [f for f in required if not data or f not in data or not data[f]]
 
 
-
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     """List all posts with optional sorting by title or content."""
@@ -35,11 +34,9 @@ def get_posts():
 
     res = list(POSTS)
 
-    if sort_field:
-        if sort_field not in ['title', 'content'] or direction not in ['asc', 'desc']:
-            return jsonify({"error": "Bad Request", "message": "Invalid sort parameters."}), 400
-
-        res.sort(key=lambda x: x[sort_field].lower(), reverse=(direction == 'desc'))
+    if sort_field in ['title', 'content']:
+        is_descending = (direction == 'desc')
+        res.sort(key=lambda x: x[sort_field].lower(), reverse=is_descending)
 
     return jsonify(res)
 
