@@ -65,13 +65,13 @@ def add_post():
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     """Remove a post from the list by its ID."""
-    global POSTS
     post = find_post_by_id(post_id)
 
     if not post:
         return jsonify({"error": "Not Found", "message": "Post not found."}), 404
 
-    POSTS = [p for p in POSTS if p['id'] != post_id]
+    POSTS.remove(post)
+
     return jsonify({"message": f"Post {post_id} deleted."}), 200
 
 
@@ -87,6 +87,7 @@ def update_post(post_id):
     post['title'] = data.get('title', post['title'])
     post['content'] = data.get('content', post['content'])
     return jsonify(post), 200
+
 
 @app.route('/api/posts/search', methods=['GET'])
 def search_posts():
